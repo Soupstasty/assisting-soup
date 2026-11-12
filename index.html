@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcademiaTrack & AI Blindspot Intelligence</title>
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for interactive analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Backend API Client -->
+  <script src="api-client.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              200: '#bae0fd',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              purple: '#8b5cf6',
+              amber: '#f59e0b',
+              emerald: '#10b981',
+              rose: '#f43f5e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar & animations */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.03);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.45);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    .gradient-mesh {
+      background: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+    }
+    .dark .gradient-mesh {
+      background: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.2) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.18) 0px, transparent 50%),
+                  radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.12) 0px, transparent 50%);
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.94; transform: scale(1.015); }
+    }
+    .pulse-ai {
+      animation: pulse-subtle 4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+  <div class="gradient-mesh min-h-screen flex flex-col">
+
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-40 glass-card border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-xs">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i data-lucide="brain-circuit" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-300 dark:to-purple-300 bg-clip-text text-transparent">
+              AcademiaAI
+            </span>
+            <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+              Smart Tracker
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Study Hours &bull; Due Assignments &bull; AI Blind Spot Detector</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions & Profile -->
+      <div class="flex items-center gap-3">
+        <!-- Backend Status Indicator Pill -->
+        <div id="backendStatusPill" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700" title="Backend Server Connectivity">
+          <span id="backendStatusDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+          <span id="backendStatusText">Checking API...</span>
+        </div>
+
+        <!-- Live Study Timer Pill -->
+        <div id="activeTimerBadge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 text-xs font-medium cursor-pointer hover:bg-amber-100 transition" onclick="toggleTimerModal()">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+          <span id="activeTimerText">Timer Idle</span>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button onclick="toggleDarkMode()" class="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Toggle Theme">
+          <i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Reset / Demo Data Dropdown -->
+        <button onclick="loadSampleData()" class="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition flex items-center gap-1.5" title="Reset sample study logs & assignments">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i>
+          <span>Reload Demo</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+
+      <!-- Hero Header & Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Card 1: Total Study Hours -->
+        <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Studied</span>
+            <div class="p-2 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
+              <i data-lucide="clock-3" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statTotalHours" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+            <span class="text-sm font-medium text-slate-500">hrs</span>
+          </div>
+          <p id="statWeeklyComparison" class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2 flex items-center gap-1">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Across <span id="statActiveDays">0</span> days logged
+          </p>
+        </div>
+
+        <!-- Card 2: Today's Focus -->
+        <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Today's Focus</span>
+            <div class="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+              <i data-lucide="flame" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statTodayHours" class="text-3xl font-extrabold text-slate-900 dark:text-white">0.0</h3>
+            <span class="text-sm font-medium text-slate-500">hrs / 4.0 target</span>
+          </div>
+          <!-- Progress bar -->
+          <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+            <div id="statTodayProgress" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Card 3: Pending Assignments -->
+        <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Due Assignments</span>
+            <div class="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+              <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statPendingAssignments" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+            <span class="text-sm font-medium text-slate-500">pending</span>
+          </div>
+          <p id="statUrgentDue" class="text-xs text-rose-500 dark:text-rose-400 font-semibold mt-2 flex items-center gap-1">
+            <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> <span id="statUrgentCount">0</span> due within 48h
+          </p>
+        </div>
+
+        <!-- Card 4: AI Blind Spot Risk Score -->
+        <div class="glass-card rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition border-l-4 border-l-purple-500">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">AI Blind Spot Risk</span>
+            <div class="p-2 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400">
+              <i data-lucide="radar" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statRiskScore" class="text-3xl font-extrabold text-purple-600 dark:text-purple-300">Moderate</h3>
+          </div>
+          <p id="statRiskDetail" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-2">
+            Click AI Intelligence for breakdown
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 bg-white/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+        <div class="flex items-center gap-3">
+          <button onclick="openStudyModal()" class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-blue-500/20 transition transform active:scale-95">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Log Study Hours</span>
+          </button>
+          <button onclick="openAssignmentModal()" class="flex items-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-xl text-sm font-semibold transition transform active:scale-95">
+            <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+            <span>Add Assignment</span>
+          </button>
+          <button onclick="toggleTimerModal()" class="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-sm font-semibold transition transform active:scale-95">
+            <i data-lucide="play" class="w-4 h-4"></i>
+            <span>Focus Stopwatch</span>
+          </button>
+        </div>
+
+        <!-- Direct Trigger for AI Blindspot Scan -->
+        <button onclick="runBlindSpotAudit()" class="pulse-ai flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-purple-500/25 transition transform active:scale-95">
+          <i data-lucide="sparkles" class="w-4 h-4 animate-spin text-purple-200" style="animation-duration: 6s;"></i>
+          <span>Run AI Blindspot Audit</span>
+        </button>
+      </div>
+
+      <!-- SECTION: AI BLIND SPOT INTELLIGENCE ENGINE (FEATURE OF PROMINENCE) -->
+      <section class="glass-card rounded-3xl p-6 sm:p-8 border border-purple-200/70 dark:border-purple-900/50 relative overflow-hidden shadow-sm">
+        <div class="absolute -right-20 -top-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                  <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Gemini-Powered Cognitive Diagnostics
+                </span>
+                <span class="text-xs text-slate-400">Multi-factor heuristic & ML analysis</span>
+              </div>
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white mt-1.5">AI Academic Blind Spot Analysis</h2>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                Pinpoints neglected subjects, urgency mismatches (high-stakes deadlines with zero prep), comprehension gaps, and study distribution fatigue.
+              </p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <!-- AI Configuration button -->
+              <button onclick="openApiKeyModal()" class="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center gap-1.5 transition" title="Add your Gemini API Key for dynamic live inference">
+                <i data-lucide="key" class="w-3.5 h-3.5 text-amber-500"></i>
+                <span id="apiKeyStatusLabel">Gemini API Key</span>
+              </button>
+              <button onclick="runBlindSpotAudit()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-md shadow-purple-500/20 transition flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Re-Analyze</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Blind Spots Display Area -->
+          <div id="aiAnalysisContainer" class="mt-6 space-y-4">
+            <!-- Dynamic AI Cards will be injected here -->
+            <div class="flex flex-col items-center justify-center py-12 text-center text-slate-400">
+              <i data-lucide="brain" class="w-12 h-12 text-purple-400 mb-3 animate-pulse"></i>
+              <h4 class="text-base font-semibold text-slate-700 dark:text-slate-300">Synthesizing Learning Metrics...</h4>
+              <p class="text-xs text-slate-500 max-w-sm mt-1">Calculating Subject Hours, Assignment Deadlines, and Decay Curves to flag vulnerable topics.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: Interactive Visual Analytics -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Daily Study Hours Chart (Bar / Line) -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                Daily Study Distribution (Last 7 Days)
+              </h3>
+              <p class="text-xs text-slate-500">Hours spent per day partitioned across subjects</p>
+            </div>
+            <!-- Filter / Toggle -->
+            <div class="flex items-center gap-2 text-xs">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-medium">
+                Target: 4h/day
+              </span>
+            </div>
+          </div>
+          <div class="relative h-64 sm:h-72 w-full">
+            <canvas id="dailyStudyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Subject Allocation Pie / Doughnut -->
+        <div class="glass-card rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                  Subject Breakdown
+                </h3>
+                <p class="text-xs text-slate-500">Total time proportion per discipline</p>
+              </div>
+            </div>
+            <div class="relative h-56 w-full flex items-center justify-center">
+              <canvas id="subjectPieChart"></canvas>
+            </div>
+          </div>
+          <!-- Mini legend summary -->
+          <div id="subjectLegendList" class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs space-y-1.5 max-h-32 overflow-y-auto">
+            <!-- Dynamic legend items -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: TWO-COLUMN WORKFLOW (Study Log Table & Due Assignments) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- COLUMN 1: Daily Study Log History -->
+        <div class="glass-card rounded-2xl p-6 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
+                Study Sessions Log
+              </h3>
+              <p class="text-xs text-slate-500">Recorded hours per subject per day</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="filterSubjectStudy" onchange="renderStudyLogs()" class="text-xs bg-slate-100 dark:bg-slate-800 border-none rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-blue-500">
+                <option value="ALL">All Subjects</option>
+              </select>
+              <button onclick="openStudyModal()" class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 hover:bg-blue-200 transition" title="Add Log">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Study Log List / Table -->
+          <div class="overflow-x-auto flex-1 max-h-96">
+            <table class="w-full text-left text-xs">
+              <thead class="text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
+                <tr>
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3">Subject</th>
+                  <th class="py-2.5 px-3">Duration</th>
+                  <th class="py-2.5 px-3">Topics Covered</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="studyLogsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-medium text-slate-700 dark:text-slate-300">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: Due Assignments & Deadlines -->
+        <div class="glass-card rounded-2xl p-6 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="check-square" class="w-5 h-5 text-indigo-600"></i>
+                Due Assignments
+              </h3>
+              <p class="text-xs text-slate-500">Deadlines, priorities & prep status</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="filterAssignmentStatus" onchange="renderAssignments()" class="text-xs bg-slate-100 dark:bg-slate-800 border-none rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-indigo-500">
+                <option value="ALL">All Tasks</option>
+                <option value="PENDING" selected>Pending</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+              <button onclick="openAssignmentModal()" class="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-200 transition" title="Add Assignment">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Assignment List -->
+          <div id="assignmentList" class="space-y-3 flex-1 max-h-96 overflow-y-auto pr-1">
+            <!-- Injected via JavaScript -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION: Interactive Study Blind Spot Matrix & Self-Assessment Hub -->
+      <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+              <i data-lucide="layers" class="w-5 h-5 text-purple-600"></i>
+              Subject Health & Blind Spot Matrix
+            </h3>
+            <p class="text-xs text-slate-500">Compares total study hours against due assignment load and student confidence ratings to surface vulnerable areas.</p>
+          </div>
+          <button onclick="openAddSubjectModal()" class="text-xs font-semibold px-3 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 transition flex items-center gap-1.5">
+            <i data-lucide="book-plus" class="w-3.5 h-3.5"></i>
+            <span>Manage Subjects</span>
+          </button>
+        </div>
+
+        <div id="subjectMatrixGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-card border-t border-slate-200 dark:border-slate-800 py-6 px-4 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-4 h-4 text-blue-500"></i>
+          <span>AcademiaTrack Intelligent Academic Assistant &bull; Offline & Gemini API Compatible</span>
+        </div>
+        <div class="flex items-center gap-4 text-slate-400">
+          <button onclick="exportDataJSON()" class="hover:text-blue-500 transition">Export JSON</button>
+          <span>&bull;</span>
+          <label class="hover:text-blue-500 transition cursor-pointer">
+            Import JSON <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importDataJSON(event)">
+          </label>
+          <span>&bull;</span>
+          <button onclick="clearAllData()" class="hover:text-rose-500 transition">Clear Data</button>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL: Log Study Hours -->
+  <div id="modalStudy" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold">
+          <i data-lucide="clock" class="w-5 h-5"></i>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">Log Study Session</h3>
+        </div>
+        <button onclick="closeModal('modalStudy')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="formStudyLog" onsubmit="handleStudySubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+          <select id="studySubjectSelect" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2.5 focus:ring-2 focus:ring-blue-500">
+            <!-- Injected options -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Date</label>
+            <input type="date" id="studyDateInput" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Duration (Hours)</label>
+            <input type="number" step="0.25" min="0.25" max="24" id="studyHoursInput" placeholder="e.g. 1.5" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Topics Studied / Chapter</label>
+          <input type="text" id="studyTopicsInput" placeholder="e.g. Calculus Integration by parts, Proofs" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Difficult Concepts encountered</label>
+          <textarea id="studyNotesInput" rows="2" placeholder="e.g. Struggled with trigonometric substitution on question 4..." class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalStudy')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200">Cancel</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">Save Session</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add / Edit Assignment -->
+  <div id="modalAssignment" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold">
+          <i data-lucide="file-check-2" class="w-5 h-5"></i>
+          <h3 id="modalAssignmentTitle" class="text-base font-bold text-slate-900 dark:text-white">Add Assignment</h3>
+        </div>
+        <button onclick="closeModal('modalAssignment')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="formAssignment" onsubmit="handleAssignmentSubmit(event)" class="mt-4 space-y-4">
+        <input type="hidden" id="assignmentEditId" value="">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Title</label>
+          <input type="text" id="assignmentTitleInput" placeholder="e.g. Problem Set 3 - Vector Fields" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+            <select id="assignmentSubjectSelect" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+              <!-- Options populated -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Priority</label>
+            <select id="assignmentPrioritySelect" class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+              <option value="HIGH">High (Major Exam/Project)</option>
+              <option value="MEDIUM" selected>Medium (Weekly Homework)</option>
+              <option value="LOW">Low (Reading/Quiz)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Due Date</label>
+            <input type="date" id="assignmentDueDateInput" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Est. Hours Required</label>
+            <input type="number" step="0.5" min="0.5" max="100" id="assignmentEstHours" placeholder="e.g. 3.5" required class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Description / Instructions</label>
+          <textarea id="assignmentDescInput" rows="2" placeholder="e.g. Complete problems 1-15, write code in C++..." class="w-full text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalAssignment')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200">Cancel</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20">Save Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Focus Stopwatch / Study Timer -->
+  <div id="modalTimer" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 text-center animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Pomodoro / Focus Timer</span>
+        <button onclick="closeModal('modalTimer')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="my-6">
+        <div id="stopwatchDisplay" class="text-5xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
+          00:00:00
+        </div>
+        <p class="text-xs text-slate-400 mt-2">Active Session Tracking</p>
+      </div>
+
+      <div class="mb-4 text-left">
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Subject</label>
+        <select id="timerSubjectSelect" class="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+
+      <div class="flex items-center justify-center gap-3">
+        <button id="timerToggleBtn" onclick="toggleTimer()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-500/25 flex items-center gap-2">
+          <i id="timerToggleIcon" data-lucide="play" class="w-4 h-4"></i>
+          <span id="timerToggleLabel">Start Focus</span>
+        </button>
+        <button onclick="resetTimer()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200">
+          Reset
+        </button>
+        <button onclick="logTimerToStudy()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold" title="Record current elapsed time to logs">
+          Save Log
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Manage Subjects -->
+  <div id="modalSubject" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold">
+          <i data-lucide="book" class="w-5 h-5"></i>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">Subject Portfolio & Confidence</h3>
+        </div>
+        <button onclick="closeModal('modalSubject')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Add New Subject -->
+      <form id="formAddSubject" onsubmit="handleAddSubject(event)" class="mt-4 flex gap-2">
+        <input type="text" id="newSubjectName" placeholder="New subject name (e.g. Organic Chemistry)" required class="flex-1 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 focus:ring-2 focus:ring-purple-500">
+        <button type="submit" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold">
+          Add
+        </button>
+      </form>
+
+      <!-- Subject List with Confidence Sliders -->
+      <div class="mt-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Current Subjects & Self-Rating (1-5)</h4>
+        <div id="subjectManageList" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Gemini API Key Setup -->
+  <div id="modalApiKey" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-2 text-amber-500 font-bold">
+          <i data-lucide="key" class="w-5 h-5"></i>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">Gemini API Key (Optional)</h3>
+        </div>
+        <button onclick="closeModal('modalApiKey')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-3 text-xs text-slate-600 dark:text-slate-400">
+        <p>
+          The system comes equipped with an <strong>integrated High-Precision Algorithmic Blind Spot Engine</strong> that functions instantly offline without any setup.
+        </p>
+        <p>
+          If you provide your Google Gemini API Key, AcademiaAI will also generate <strong>deep, personalized natural-language strategic study roadmaps and diagnostic insights</strong>.
+        </p>
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Gemini API Key</label>
+          <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2.5 focus:ring-2 focus:ring-amber-500 font-mono">
+        </div>
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" onclick="clearApiKey()" class="text-rose-500 hover:underline">Remove Key</button>
+          <div class="flex gap-2">
+            <button type="button" onclick="closeModal('modalApiKey')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Cancel</button>
+            <button type="button" onclick="saveApiKey()" class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold">Save Key</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION CORE SCRIPT -->
+  <script>
+    /* =========================================================================
+       STATE MANAGEMENT & PERSISTENCE
+       ========================================================================= */
+    const STORAGE_KEY_LOGS = 'academia_study_logs_v1';
+    const STORAGE_KEY_ASSIGNMENTS = 'academia_assignments_v1';
+    const STORAGE_KEY_SUBJECTS = 'academia_subjects_v1';
+    const STORAGE_KEY_APIKEY = 'academia_gemini_key_v1';
+    const STORAGE_KEY_THEME = 'academia_theme_v1';
+
+    // Default Sample Subjects
+    const DEFAULT_SUBJECTS = [
+      { id: 'sub-1', name: 'Mathematics (Calculus III)', color: '#3b82f6', confidence: 2 }, // low confidence = potential blind spot
+      { id: 'sub-2', name: 'Computer Science (Algorithms)', color: '#8b5cf6', confidence: 4 },
+      { id: 'sub-3', name: 'Physics (Electromagnetism)', color: '#f59e0b', confidence: 2 },
+      { id: 'sub-4', name: 'Organic Chemistry', color: '#10b981', confidence: 1 }, // very low
+      { id: 'sub-5', name: 'Academic Writing & History', color: '#ec4899', confidence: 5 }
+    ];
+
+    // Helper to format ISO date offset
+    function getDateOffset(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split('T')[0];
+    }
+
+    // Default Study Logs (covering past 7 days)
+    const DEFAULT_LOGS = [
+      { id: 'log-1', subjectId: 'sub-2', date: getDateOffset(-6), hours: 3.5, topics: 'Graph Theory & Dijkstra', notes: 'Mastered shortest paths' },
+      { id: 'log-2', subjectId: 'sub-5', date: getDateOffset(-5), hours: 2.0, topics: 'Essay Draft Revision', notes: 'Drafted introduction' },
+      { id: 'log-3', subjectId: 'sub-2', date: getDateOffset(-4), hours: 4.0, topics: 'Dynamic Programming (Knapsack)', notes: 'Solved 4 problems' },
+      { id: 'log-4', subjectId: 'sub-1', date: getDateOffset(-3), hours: 1.0, topics: 'Multiple Integrals intro', notes: 'Found spherical coords confusing' },
+      { id: 'log-5', subjectId: 'sub-2', date: getDateOffset(-2), hours: 3.0, topics: 'Bellman-Ford & Floyd-Warshall', notes: 'Reviewed complexities' },
+      { id: 'log-6', subjectId: 'sub-5', date: getDateOffset(-1), hours: 2.5, topics: 'Peer Review & Citations', notes: 'Finished citations' },
+      { id: 'log-7', subjectId: 'sub-1', date: getDateOffset(0), hours: 1.5, topics: 'Surface integrals practice', notes: 'Need more practice with Green theorem' },
+    ];
+
+    // Default Assignments (with varied due dates to provoke blind spots)
+    const DEFAULT_ASSIGNMENTS = [
+      {
+        id: 'asg-1',
+        title: 'Midterm Examination: Electromagnetism',
+        subjectId: 'sub-3',
+        dueDate: getDateOffset(2), // 2 days away!
+        estHours: 6.0,
+        priority: 'HIGH',
+        status: 'PENDING',
+        desc: 'Chapters 21 to 26 - Gauss Law, Magnetic Flux, and Induction.'
+      },
+      {
+        id: 'asg-2',
+        title: 'Organic Chemistry Synthesis Problem Set',
+        subjectId: 'sub-4',
+        dueDate: getDateOffset(3), // 3 days away!
+        estHours: 4.5,
+        priority: 'HIGH',
+        status: 'PENDING',
+        desc: 'Reaction mechanisms, SN1/SN2 pathways and NMR spectroscopy.'
+      },
+      {
+        id: 'asg-3',
+        title: 'Calculus III WebAssign #5',
+        subjectId: 'sub-1',
+        dueDate: getDateOffset(5),
+        estHours: 3.0,
+        priority: 'MEDIUM',
+        status: 'PENDING',
+        desc: 'Triple integrals and Vector calculus.'
+      },
+      {
+        id: 'asg-4',
+        title: 'Algorithms Homework 4: Graphs',
+        subjectId: 'sub-2',
+        dueDate: getDateOffset(8),
+        estHours: 4.0,
+        priority: 'MEDIUM',
+        status: 'PENDING',
+        desc: 'Implement A* search and benchmark against Dijkstra.'
+      },
+      {
+        id: 'asg-5',
+        title: 'History Paper Final Submission',
+        subjectId: 'sub-5',
+        dueDate: getDateOffset(-1),
+        estHours: 5.0,
+        priority: 'HIGH',
+        status: 'COMPLETED',
+        desc: 'Submitted via Canvas.'
+      }
+    ];
+
+    let state = {
+      subjects: JSON.parse(localStorage.getItem(STORAGE_KEY_SUBJECTS)) || DEFAULT_SUBJECTS,
+      studyLogs: JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || DEFAULT_LOGS,
+      assignments: JSON.parse(localStorage.getItem(STORAGE_KEY_ASSIGNMENTS)) || DEFAULT_ASSIGNMENTS,
+      geminiApiKey: localStorage.getItem(STORAGE_KEY_APIKEY) || '',
+      isDarkMode: localStorage.getItem(STORAGE_KEY_THEME) === 'dark'
+    };
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY_SUBJECTS, JSON.stringify(state.subjects));
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(state.studyLogs));
+      localStorage.setItem(STORAGE_KEY_ASSIGNMENTS, JSON.stringify(state.assignments));
+    }
+
+    function loadSampleData() {
+      state.subjects = JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
+      state.studyLogs = JSON.parse(JSON.stringify(DEFAULT_LOGS));
+      state.assignments = JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS));
+      saveState();
+      refreshAll();
+    }
+
+    function clearAllData() {
+      if (confirm("Are you sure you want to reset all tracked academic data?")) {
+        state.studyLogs = [];
+        state.assignments = [];
+        saveState();
+        refreshAll();
+      }
+    }
+
+    /* =========================================================================
+       THEME MANAGEMENT
+       ========================================================================= */
+    function initTheme() {
+      if (state.isDarkMode) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+      }
+    }
+
+    function toggleDarkMode() {
+      state.isDarkMode = !state.isDarkMode;
+      localStorage.setItem(STORAGE_KEY_THEME, state.isDarkMode ? 'dark' : 'light');
+      initTheme();
+      lucide.createIcons();
+      updateChartsTheme();
+    }
+
+    /* =========================================================================
+       STOPWATCH / POMODORO TIMER
+       ========================================================================= */
+    let timerInterval = null;
+    let timerElapsedSeconds = 0;
+    let isTimerRunning = false;
+
+    function toggleTimer() {
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        document.getElementById('timerToggleLabel').textContent = 'Resume Focus';
+        document.getElementById('timerToggleIcon').setAttribute('data-lucide', 'play');
+        document.getElementById('activeTimerBadge').classList.remove('border-emerald-500');
+      } else {
+        isTimerRunning = true;
+        document.getElementById('timerToggleLabel').textContent = 'Pause Focus';
+        document.getElementById('timerToggleIcon').setAttribute('data-lucide', 'pause');
+        timerInterval = setInterval(() => {
+          timerElapsedSeconds++;
+          renderTimerDisplay();
+        }, 1000);
+      }
+      lucide.createIcons();
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerElapsedSeconds = 0;
+      renderTimerDisplay();
+      document.getElementById('timerToggleLabel').textContent = 'Start Focus';
+      document.getElementById('timerToggleIcon').setAttribute('data-lucide', 'play');
+      lucide.createIcons();
+    }
+
+    function renderTimerDisplay() {
+      const hrs = Math.floor(timerElapsedSeconds / 3600);
+      const mins = Math.floor((timerElapsedSeconds % 3600) / 60);
+      const secs = timerElapsedSeconds % 60;
+      const formatted = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      
+      document.getElementById('stopwatchDisplay').textContent = formatted;
+      
+      const badge = document.getElementById('activeTimerBadge');
+      const badgeText = document.getElementById('activeTimerText');
+      if (isTimerRunning || timerElapsedSeconds > 0) {
+        badge.classList.remove('hidden');
+        badgeText.textContent = `Focusing: ${formatted}`;
+      } else {
+        badgeText.textContent = 'Timer Idle';
+      }
+    }
+
+    function logTimerToStudy() {
+      if (timerElapsedSeconds < 60) {
+        alert("Focus session is under 1 minute. Study longer before recording a log.");
+        return;
+      }
+      const hours = +(timerElapsedSeconds / 3600).toFixed(2);
+      const subjectId = document.getElementById('timerSubjectSelect').value;
+      const subject = state.subjects.find(s => s.id === subjectId) || state.subjects[0];
+      
+      const newLog = {
+        id: 'log-' + Date.now(),
+        subjectId: subject.id,
+        date: new Date().toISOString().split('T')[0],
+        hours: hours,
+        topics: 'Live Focus Session',
+        notes: `Recorded via Focus Stopwatch (${Math.round(timerElapsedSeconds / 60)} minutes)`
+      };
+
+      state.studyLogs.unshift(newLog);
+      saveState();
+      resetTimer();
+      closeModal('modalTimer');
+      refreshAll();
+      alert(`Successfully logged ${hours} hrs of focus for ${subject.name}!`);
+    }
+
+    /* =========================================================================
+       CHARTS (CHART.JS)
+       ========================================================================= */
+    let dailyChartInstance = null;
+    let pieChartInstance = null;
+
+    function getChartColors() {
+      const isDark = document.documentElement.classList.contains('dark');
+      return {
+        gridColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+        textColor: isDark ? '#94a3b8' : '#64748b'
+      };
+    }
+
+    function initOrUpdateCharts() {
+      const colors = getChartColors();
+
+      // 1. Prepare Daily Study Distribution (Last 7 Days)
+      const last7Days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        last7Days.push(d.toISOString().split('T')[0]);
+      }
+
+      // Group hours by date and subject
+      const datasets = state.subjects.map(subject => {
+        const data = last7Days.map(dateStr => {
+          const matchLogs = state.studyLogs.filter(l => l.date === dateStr && l.subjectId === subject.id);
+          return matchLogs.reduce((acc, curr) => acc + Number(curr.hours), 0);
+        });
+        return {
+          label: subject.name,
+          data: data,
+          backgroundColor: subject.color,
+          borderRadius: 6,
+          stack: 'combined'
+        };
+      });
+
+      const dayLabels = last7Days.map(dStr => {
+        const d = new Date(dStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' });
+      });
+
+      const dailyCtx = document.getElementById('dailyStudyChart').getContext('2d');
+      if (dailyChartInstance) {
+        dailyChartInstance.destroy();
+      }
+
+      dailyChartInstance = new Chart(dailyCtx, {
+        type: 'bar',
+        data: {
+          labels: dayLabels,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: colors.textColor,
+                boxWidth: 12,
+                font: { size: 11, family: 'Plus Jakarta Sans' }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.dataset.label}: ${context.raw.toFixed(1)} hrs`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+              grid: { display: false },
+              ticks: { color: colors.textColor, font: { size: 11, family: 'Plus Jakarta Sans' } }
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              grid: { color: colors.gridColor },
+              ticks: {
+                color: colors.textColor,
+                callback: (v) => v + 'h',
+                font: { size: 11, family: 'Plus Jakarta Sans' }
+              }
+            }
+          }
+        }
+      });
+
+      // 2. Prepare Subject Breakdown Pie Chart
+      const subjectTotals = state.subjects.map(subject => {
+        const total = state.studyLogs
+          .filter(l => l.subjectId === subject.id)
+          .reduce((sum, item) => sum + Number(item.hours), 0);
+        return {
+          name: subject.name,
+          total: total,
+          color: subject.color
+        };
+      });
+
+      const pieCtx = document.getElementById('subjectPieChart').getContext('2d');
+      if (pieChartInstance) {
+        pieChartInstance.destroy();
+      }
+
+      const hasData = subjectTotals.some(s => s.total > 0);
+
+      pieChartInstance = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+          labels: hasData ? subjectTotals.map(s => s.name) : ['No Study Logs'],
+          datasets: [{
+            data: hasData ? subjectTotals.map(s => s.total) : [1],
+            backgroundColor: hasData ? subjectTotals.map(s => s.color) : ['#94a3b8'],
+            borderWidth: 2,
+            borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: hasData,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.label}: ${Number(context.raw).toFixed(1)} hrs`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Render mini legend list
+      const legendList = document.getElementById('subjectLegendList');
+      legendList.innerHTML = subjectTotals.map(s => `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 truncate">
+            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${s.color}"></span>
+            <span class="truncate text-slate-700 dark:text-slate-300 font-medium">${s.name}</span>
+          </div>
+          <span class="font-bold text-slate-900 dark:text-white shrink-0">${s.total.toFixed(1)}h</span>
+        </div>
+      `).join('');
+    }
+
+    function updateChartsTheme() {
+      if (dailyChartInstance && pieChartInstance) {
+        initOrUpdateCharts();
+      }
+    }
+
+    /* =========================================================================
+       AI BLIND SPOT INTELLIGENCE ENGINE
+       ========================================================================= */
+    /**
+     * The AI Blind Spot Engine implements a multi-variable cognitive diagnostics system:
+     * 1. Neglect Index: Subject hours vs average study hours over the last 14 days
+     * 2. Urgency Mismatch: Pending high-priority assignments due in < 48h-96h with zero or deficient prep
+     * 3. Knowledge Decay & Cram Risk: Large gaps between study sessions followed by an impending exam
+     * 4. Confidence vs Reality Paradox: High self-reported confidence with zero recorded review
+     * 5. Study Distribution Skew: Over-indexing on one comfortable subject while starving harder ones
+     *
+     * It functions entirely in-browser algorithmically, and if a Gemini API Key is configured,
+     * additionally prompts Google Gemini for deep strategic coaching.
+     */
+    async function runBlindSpotAudit() {
+      const container = document.getElementById('aiAnalysisContainer');
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-10 text-center">
+          <div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+          <p class="text-sm font-bold text-purple-600 dark:text-purple-400">Auditing Academic Profile...</p>
+          <p class="text-xs text-slate-500 mt-1">Cross-referencing study velocity, assignment deadlines, and retention decay...</p>
+        </div>
+      `;
+
+      // Calculate Algorithmic Diagnostics
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+
+      // Total hours and subject hours
+      const subjectMetrics = state.subjects.map(sub => {
+        const logs = state.studyLogs.filter(l => l.subjectId === sub.id);
+        const totalHours = logs.reduce((sum, l) => sum + Number(l.hours), 0);
+        
+        // Find most recent log
+        let daysSinceLastStudy = 999;
+        if (logs.length > 0) {
+          const sorted = [...logs].sort((a,b) => new Date(b.date) - new Date(a.date));
+          const lastDate = new Date(sorted[0].date);
+          const diffTime = Math.abs(now - lastDate);
+          daysSinceLastStudy = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // Pending assignments for this subject
+        const pendingAsgs = state.assignments.filter(a => a.subjectId === sub.id && a.status === 'PENDING');
+        
+        // Check for urgent assignments (< 4 days)
+        const urgentAsgs = pendingAsgs.filter(a => {
+          const due = new Date(a.dueDate);
+          const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+          return diffDays <= 4;
+        });
+
+        const totalEstHoursPending = pendingAsgs.reduce((sum, a) => sum + Number(a.estHours), 0);
+
+        return {
+          subject: sub,
+          totalHours,
+          daysSinceLastStudy,
+          pendingAsgsCount: pendingAsgs.length,
+          urgentAsgs,
+          totalEstHoursPending,
+          confidence: sub.confidence || 3
+        };
+      });
+
+      const totalGlobalHours = subjectMetrics.reduce((sum, sm) => sum + sm.totalHours, 0);
+      const avgHoursPerSubject = state.subjects.length > 0 ? (totalGlobalHours / state.subjects.length) : 0;
+
+      // Identify Blind Spots
+      const blindSpots = [];
+
+      subjectMetrics.forEach(sm => {
+        // Blindspot 1: CRITICAL DEADLINE WITH ZERO OR NEGLIGIBLE PREPARATION
+        if (sm.urgentAsgs.length > 0 && sm.daysSinceLastStudy >= 3) {
+          const nextAsg = sm.urgentAsgs[0];
+          blindSpots.push({
+            severity: 'CRITICAL',
+            type: 'Deadline Collision',
+            subject: sm.subject.name,
+            icon: 'alert-triangle',
+            color: 'rose',
+            title: `Critical Cramming Risk: ${sm.subject.name}`,
+            metric: `Assignment "${nextAsg.title}" due soon with ${sm.daysSinceLastStudy === 999 ? 'zero' : sm.daysSinceLastStudy + ' days'} since last study session!`,
+            recommendation: `Schedule an immediate 90-minute deep-work session today targeting ${nextAsg.title}. Break down the ${nextAsg.estHours} estimated hours into two focused blocks before deadline.`
+          });
+        }
+
+        // Blindspot 2: SEVERE SUBJECT NEGLECT
+        if (sm.totalHours < (avgHoursPerSubject * 0.35) && sm.pendingAsgsCount > 0) {
+          blindSpots.push({
+            severity: 'HIGH',
+            type: 'Chronic Neglect',
+            subject: sm.subject.name,
+            icon: 'eye-off',
+            color: 'amber',
+            title: `Neglected Discipline: ${sm.subject.name}`,
+            metric: `Only ${sm.totalHours.toFixed(1)}h logged total (Class average expectation is ~${avgHoursPerSubject.toFixed(1)}h), yet you have ${sm.pendingAsgsCount} open deliverables.`,
+            recommendation: `This subject is slipping into your academic peripheral vision. Rebalance your weekly calendar by dedicating the first 45 minutes of your next 3 days here.`
+          });
+        }
+
+        // Blindspot 3: CONFIDENCE / PREPARATION DISSONANCE
+        if (sm.confidence <= 2 && sm.totalHours < avgHoursPerSubject) {
+          blindSpots.push({
+            severity: 'HIGH',
+            type: 'High Anxiety Gap',
+            subject: sm.subject.name,
+            icon: 'help-circle',
+            color: 'purple',
+            title: `Vulnerability Zone: Low Confidence in ${sm.subject.name}`,
+            metric: `Self-rated confidence is only ${sm.confidence}/5, but received only ${sm.totalHours.toFixed(1)}h of review.`,
+            recommendation: `Low comprehension requires proactive reinforcement rather than avoidance. Use active recall (flashcards, practice problems) rather than passive reading to rebuild momentum.`
+          });
+        }
+
+        // Blindspot 4: RETENTION DECAY (Ebbinghaus curve alert)
+        if (sm.daysSinceLastStudy >= 5 && sm.totalHours > 0) {
+          blindSpots.push({
+            severity: 'MEDIUM',
+            type: 'Memory Decay Risk',
+            subject: sm.subject.name,
+            icon: 'history',
+            color: 'blue',
+            title: `Memory Decay Alert: ${sm.subject.name}`,
+            metric: `${sm.daysSinceLastStudy} days since your last logged study session on this subject.`,
+            recommendation: `Human memory decay accelerates after 4-5 days without retrieval. Do a rapid 20-minute conceptual recap today to retain past study gains.`
+          });
+        }
+      });
+
+      // Blindspot 5: STUDY MONOPOLY SKEW (Student spending >60% of all time on 1 favorite subject)
+      const topSubject = [...subjectMetrics].sort((a,b) => b.totalHours - a.totalHours)[0];
+      if (topSubject && totalGlobalHours > 6 && (topSubject.totalHours / totalGlobalHours) > 0.55) {
+        const pct = Math.round((topSubject.totalHours / totalGlobalHours) * 100);
+        blindSpots.push({
+          severity: 'MEDIUM',
+          type: 'Comfort-Zone Trap',
+          subject: topSubject.subject.name,
+          icon: 'shield-alert',
+          color: 'indigo',
+          title: `Comfort-Zone Trap: Over-indexing on ${topSubject.subject.name}`,
+          metric: `${pct}% of all your recorded academic time is absorbed by this single subject.`,
+          recommendation: `You may be using this subject as a productive procrastination refuge against more demanding courses. Cap your next session here and divert 1 hour to your lowest-confidence topics.`
+        });
+      }
+
+      // If no severe blindspots detected
+      if (blindSpots.length === 0) {
+        blindSpots.push({
+          severity: 'LOW',
+          type: 'Balanced Study Pace',
+          subject: 'All Subjects',
+          icon: 'check-circle-2',
+          color: 'emerald',
+          title: 'Optimal Academic Distribution Detected',
+          metric: 'Study time is evenly distributed across your active subjects and upcoming assignment deadlines.',
+          recommendation: 'Maintain your current cadence. Ensure you continue logging daily hours and update assignment due dates as professors announce them.'
+        });
+      }
+
+      // Determine Overall Risk Score
+      const criticalCount = blindSpots.filter(b => b.severity === 'CRITICAL').length;
+      const highCount = blindSpots.filter(b => b.severity === 'HIGH').length;
+      
+      let overallRisk = 'Low';
+      let overallColor = 'text-emerald-600 dark:text-emerald-400';
+      if (criticalCount > 0) {
+        overallRisk = 'High Alert';
+        overallColor = 'text-rose-600 dark:text-rose-400';
+      } else if (highCount > 0) {
+        overallRisk = 'Moderate';
+        overallColor = 'text-amber-600 dark:text-amber-400';
+      }
+
+      document.getElementById('statRiskScore').textContent = overallRisk;
+      document.getElementById('statRiskScore').className = `text-3xl font-extrabold ${overallColor}`;
+      document.getElementById('statRiskDetail').textContent = `${blindSpots.length} diagnostic insight(s) generated`;
+
+      // Check if user has Gemini API Key for deep generation
+      let geminiExtraInsight = '';
+      if (state.geminiApiKey && state.geminiApiKey.trim() !== '') {
+        try {
+          geminiExtraInsight = await fetchGeminiInsights(subjectMetrics, blindSpots);
+        } catch (err) {
+          console.warn('Gemini API call failed, falling back to local reasoning:', err);
+        }
+      }
+
+      // Render the AI Diagnostics
+      renderBlindSpotCards(blindSpots, geminiExtraInsight);
+    }
+
+    async function fetchGeminiInsights(subjectMetrics, detectedBlindspots) {
+      const prompt = `
+You are an expert AI Academic Advisor and Learning Scientist.
+Analyze the following student metrics:
+Subjects and Study distribution: ${JSON.stringify(subjectMetrics.map(s => ({
+  name: s.subject.name,
+  hoursLogged: s.totalHours,
+  daysSinceLastStudy: s.daysSinceLastStudy,
+  pendingAssignments: s.pendingAsgsCount,
+  urgentAssignments: s.urgentAsgs.map(a => a.title),
+  confidenceRating: s.confidence
+})))}
+
+Detected heuristic issues: ${JSON.stringify(detectedBlindspots.map(b => b.title))}
+
+Provide a 3-bullet customized, high-impact tactical prescription for this student to eliminate their blind spots over the next 48 hours. Keep it crisp, encouraging, and actionable. Return formatted HTML using <ul> and <li>.
+`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.geminiApiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+
+    function renderBlindSpotCards(blindSpots, geminiHtml) {
+      const container = document.getElementById('aiAnalysisContainer');
+      
+      const badgeStyles = {
+        CRITICAL: 'bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border-rose-300 dark:border-rose-800',
+        HIGH: 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border-amber-300 dark:border-amber-800',
+        MEDIUM: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/70 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800',
+        LOW: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+      };
+
+      const borderStyles = {
+        CRITICAL: 'border-l-4 border-l-rose-500',
+        HIGH: 'border-l-4 border-l-amber-500',
+        MEDIUM: 'border-l-4 border-l-indigo-500',
+        LOW: 'border-l-4 border-l-emerald-500'
+      };
+
+      let html = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${blindSpots.map(b => `
+            <div class="bg-white dark:bg-slate-800/90 rounded-2xl p-5 border border-slate-200 dark:border-slate-700/80 shadow-xs hover:shadow-md transition flex flex-col justify-between ${borderStyles[b.severity] || ''}">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                  <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${badgeStyles[b.severity]}">
+                    ${b.severity} &bull; ${b.type}
+                  </span>
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[140px]">
+                    ${b.subject}
+                  </span>
+                </div>
+                
+                <h4 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base mb-1.5 flex items-center gap-2">
+                  <i data-lucide="${b.icon}" class="w-4 h-4 text-${b.color}-500 shrink-0"></i>
+                  <span>${b.title}</span>
+                </h4>
+                
+                <p class="text-xs text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+                  ${b.metric}
+                </p>
+              </div>
+
+              <div class="mt-2 pt-3 border-t border-slate-100 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-900/40 -mx-5 -mb-5 p-4 rounded-b-2xl">
+                <div class="flex items-start gap-2">
+                  <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                  <div>
+                    <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wide">Tactical Prescription</span>
+                    <p class="text-xs font-medium text-slate-700 dark:text-slate-200 leading-snug">
+                      ${b.recommendation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // If dynamic Gemini AI response exists, embed it
+      if (geminiHtml) {
+        html += `
+          <div class="mt-4 p-5 rounded-2xl bg-gradient-to-r from-purple-900/10 via-indigo-900/10 to-blue-900/10 border border-purple-300 dark:border-purple-800">
+            <div class="flex items-center gap-2 mb-2 text-purple-700 dark:text-purple-300 font-bold text-sm">
+              <i data-lucide="sparkles" class="w-4 h-4 text-purple-500"></i>
+              <span>Gemini Deep Academic Strategic Blueprint</span>
+            </div>
+            <div class="text-xs text-slate-700 dark:text-slate-300 prose dark:prose-invert max-w-none">
+              ${geminiHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    /* =========================================================================
+       STUDY LOGS TABLE & FORM
+       ========================================================================= */
+    function renderStudyLogs() {
+      const tbody = document.getElementById('studyLogsTableBody');
+      const filterSub = document.getElementById('filterSubjectStudy').value;
+
+      let logs = [...state.studyLogs].sort((a,b) => new Date(b.date) - new Date(a.date));
+      if (filterSub !== 'ALL') {
+        logs = logs.filter(l => l.subjectId === filterSub);
+      }
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-8 text-center text-slate-400">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+              No study logs found. Click <strong>Log Study Hours</strong> to record your first session.
+            </td>
+          </tr>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      tbody.innerHTML = logs.map(log => {
+        const sub = state.subjects.find(s => s.id === log.subjectId) || { name: 'Unknown', color: '#94a3b8' };
+        return `
+          <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+            <td class="py-3 px-3 whitespace-nowrap text-slate-500 dark:text-slate-400">${log.date}</td>
+            <td class="py-3 px-3">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold" style="background-color: ${sub.color}22; color: ${sub.color}">
+                <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${sub.color}"></span>
+                ${sub.name}
+              </span>
+            </td>
+            <td class="py-3 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">${Number(log.hours).toFixed(1)} hrs</td>
+            <td class="py-3 px-3 max-w-xs truncate" title="${log.topics}">
+              <span class="font-medium text-slate-800 dark:text-slate-200">${log.topics}</span>
+              ${log.notes ? `<p class="text-[10px] text-slate-400 truncate">${log.notes}</p>` : ''}
+            </td>
+            <td class="py-3 px-3 text-right">
+              <button onclick="deleteStudyLog('${log.id}')" class="text-slate-400 hover:text-rose-500 transition p-1" title="Delete">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    async function handleStudySubmit(e) {
+      e.preventDefault();
+      const subjectId = document.getElementById('studySubjectSelect').value;
+      const date = document.getElementById('studyDateInput').value;
+      const hours = parseFloat(document.getElementById('studyHoursInput').value);
+      const topics = document.getElementById('studyTopicsInput').value.trim();
+      const notes = document.getElementById('studyNotesInput').value.trim();
+
+      const newLog = {
+        id: 'log-' + Date.now(),
+        subjectId,
+        date,
+        hours,
+        topics,
+        notes
+      };
+
+      state.studyLogs.unshift(newLog);
+      saveState();
+      await AcademicAPI.addStudyLog(newLog);
+      closeModal('modalStudy');
+      document.getElementById('formStudyLog').reset();
+      refreshAll();
+    }
+
+    async function deleteStudyLog(id) {
+      if (confirm("Delete this study session?")) {
+        state.studyLogs = state.studyLogs.filter(l => l.id !== id);
+        saveState();
+        await AcademicAPI.deleteStudyLog(id);
+        refreshAll();
+      }
+    }
+
+    /* =========================================================================
+       ASSIGNMENTS LIST & FORM
+       ========================================================================= */
+    function renderAssignments() {
+      const container = document.getElementById('assignmentList');
+      const filterStatus = document.getElementById('filterAssignmentStatus').value;
+
+      let asgs = [...state.assignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+      if (filterStatus !== 'ALL') {
+        asgs = asgs.filter(a => a.status === filterStatus);
+      }
+
+      if (asgs.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-slate-400">
+            <i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            No assignments match the selected criteria.
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      container.innerHTML = asgs.map(a => {
+        const sub = state.subjects.find(s => s.id === a.subjectId) || { name: 'Unknown', color: '#94a3b8' };
+        const dueDate = new Date(a.dueDate + 'T00:00:00');
+        const diffDays = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
+
+        let dueBadge = '';
+        if (a.status === 'COMPLETED') {
+          dueBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">Completed</span>`;
+        } else if (diffDays < 0) {
+          dueBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300">Overdue by ${Math.abs(diffDays)}d</span>`;
+        } else if (diffDays === 0) {
+          dueBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse">Due Today!</span>`;
+        } else if (diffDays === 1) {
+          dueBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">Due Tomorrow</span>`;
+        } else {
+          dueBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Due in ${diffDays} days</span>`;
+        }
+
+        const priorityBadge = {
+          HIGH: 'text-rose-500 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900',
+          MEDIUM: 'text-amber-500 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900',
+          LOW: 'text-blue-500 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900',
+        }[a.priority] || 'text-slate-500';
+
+        return `
+          <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white/70 dark:bg-slate-800/80 hover:border-slate-300 transition flex items-start justify-between gap-3 ${a.status === 'COMPLETED' ? 'opacity-65' : ''}">
+            <div class="flex items-start gap-3">
+              <button onclick="toggleAssignmentStatus('${a.id}')" class="mt-0.5 text-slate-300 hover:text-indigo-600 dark:text-slate-600 dark:hover:text-indigo-400 transition" title="Toggle Done">
+                <i data-lucide="${a.status === 'COMPLETED' ? 'check-circle' : 'circle'}" class="w-5 h-5 ${a.status === 'COMPLETED' ? 'text-emerald-500 fill-emerald-100 dark:fill-emerald-950' : ''}"></i>
+              </button>
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold" style="background-color: ${sub.color}22; color: ${sub.color}">
+                    ${sub.name}
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${priorityBadge}">
+                    ${a.priority}
+                  </span>
+                  ${dueBadge}
+                </div>
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white ${a.status === 'COMPLETED' ? 'line-through text-slate-400' : ''}">
+                  ${a.title}
+                </h4>
+                ${a.desc ? `<p class="text-[11px] text-slate-500 mt-0.5">${a.desc}</p>` : ''}
+                <div class="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400 font-medium">
+                  <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${a.dueDate}</span>
+                  <span class="flex items-center gap-1"><i data-lucide="timer" class="w-3 h-3"></i> Est: ${a.estHours}h</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1">
+              <button onclick="editAssignment('${a.id}')" class="p-1 text-slate-400 hover:text-indigo-500 transition" title="Edit">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteAssignment('${a.id}')" class="p-1 text-slate-400 hover:text-rose-500 transition" title="Delete">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    async function toggleAssignmentStatus(id) {
+      const asg = state.assignments.find(a => a.id === id);
+      if (asg) {
+        asg.status = asg.status === 'PENDING' ? 'COMPLETED' : 'PENDING';
+        saveState();
+        await AcademicAPI.updateAssignment(id, { status: asg.status });
+        refreshAll();
+      }
+    }
+
+    async function handleAssignmentSubmit(e) {
+      e.preventDefault();
+      const editId = document.getElementById('assignmentEditId').value;
+      const title = document.getElementById('assignmentTitleInput').value.trim();
+      const subjectId = document.getElementById('assignmentSubjectSelect').value;
+      const priority = document.getElementById('assignmentPrioritySelect').value;
+      const dueDate = document.getElementById('assignmentDueDateInput').value;
+      const estHours = parseFloat(document.getElementById('assignmentEstHours').value);
+      const desc = document.getElementById('assignmentDescInput').value.trim();
+
+      if (editId) {
+        const asg = state.assignments.find(a => a.id === editId);
+        if (asg) {
+          asg.title = title;
+          asg.subjectId = subjectId;
+          asg.priority = priority;
+          asg.dueDate = dueDate;
+          asg.estHours = estHours;
+          asg.desc = desc;
+          await AcademicAPI.updateAssignment(editId, asg);
+        }
+      } else {
+        const newAsg = {
+          id: 'asg-' + Date.now(),
+          title,
+          subjectId,
+          priority,
+          dueDate,
+          estHours,
+          desc,
+          status: 'PENDING'
+        };
+        state.assignments.unshift(newAsg);
+        await AcademicAPI.addAssignment(newAsg);
+      }
+
+      saveState();
+      closeModal('modalAssignment');
+      document.getElementById('formAssignment').reset();
+      refreshAll();
+    }
+
+    function editAssignment(id) {
+      const a = state.assignments.find(x => x.id === id);
+      if (!a) return;
+      document.getElementById('modalAssignmentTitle').textContent = 'Edit Assignment';
+      document.getElementById('assignmentEditId').value = a.id;
+      document.getElementById('assignmentTitleInput').value = a.title;
+      document.getElementById('assignmentSubjectSelect').value = a.subjectId;
+      document.getElementById('assignmentPrioritySelect').value = a.priority;
+      document.getElementById('assignmentDueDateInput').value = a.dueDate;
+      document.getElementById('assignmentEstHours').value = a.estHours;
+      document.getElementById('assignmentDescInput').value = a.desc || '';
+      openModal('modalAssignment');
+    }
+
+    async function deleteAssignment(id) {
+      if (confirm("Delete this assignment?")) {
+        state.assignments = state.assignments.filter(a => a.id !== id);
+        saveState();
+        await AcademicAPI.deleteAssignment(id);
+        refreshAll();
+      }
+    }
+        saveState();
+        refreshAll();
+      }
+    }
+
+    /* =========================================================================
+       SUBJECT HEALTH & BLIND SPOT MATRIX
+       ========================================================================= */
+    function renderSubjectMatrix() {
+      const container = document.getElementById('subjectMatrixGrid');
+      
+      container.innerHTML = state.subjects.map(sub => {
+        const logs = state.studyLogs.filter(l => l.subjectId === sub.id);
+        const totalHours = logs.reduce((sum, l) => sum + Number(l.hours), 0);
+        const pendingAsgs = state.assignments.filter(a => a.subjectId === sub.id && a.status === 'PENDING');
+        
+        // Status indicator
+        let statusBadge = '<span class="text-emerald-500 font-bold">Healthy</span>';
+        if (sub.confidence <= 2 && totalHours < 3) {
+          statusBadge = '<span class="text-rose-500 font-bold flex items-center gap-1"><i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> High Blind Spot</span>';
+        } else if (pendingAsgs.length >= 2 && totalHours < 2) {
+          statusBadge = '<span class="text-amber-500 font-bold flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Urgency Lag</span>';
+        }
+
+        return `
+          <div class="bg-white/80 dark:bg-slate-800/80 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-3 h-3 rounded-full" style="background-color: ${sub.color}"></span>
+                <span class="text-[11px]">${statusBadge}</span>
+              </div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-xs truncate" title="${sub.name}">
+                ${sub.name}
+              </h4>
+              <div class="mt-3 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+                <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                  <span class="block text-[10px] text-slate-400 uppercase">Hours</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-100 text-sm">${totalHours.toFixed(1)}h</span>
+                </div>
+                <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                  <span class="block text-[10px] text-slate-400 uppercase">Due Tasks</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-100 text-sm">${pendingAsgs.length}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[11px]">
+              <span class="text-slate-400">Confidence:</span>
+              <div class="flex items-center gap-1">
+                ${[1,2,3,4,5].map(star => `
+                  <i data-lucide="star" class="w-3.5 h-3.5 ${star <= (sub.confidence || 3) ? 'text-amber-400 fill-amber-400' : 'text-slate-300 dark:text-slate-600'}"></i>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    /* =========================================================================
+       SUBJECT MANAGEMENT & CONFIDENCE
+       ========================================================================= */
+    function populateSubjectDropdowns() {
+      const selects = [
+        document.getElementById('studySubjectSelect'),
+        document.getElementById('assignmentSubjectSelect'),
+        document.getElementById('timerSubjectSelect'),
+      ];
+
+      selects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = state.subjects.map(s => `
+          <option value="${s.id}">${s.name}</option>
+        `).join('');
+      });
+
+      const filterStudy = document.getElementById('filterSubjectStudy');
+      if (filterStudy) {
+        const curVal = filterStudy.value;
+        filterStudy.innerHTML = `
+          <option value="ALL">All Subjects</option>
+          ${state.subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+        `;
+        filterStudy.value = curVal || 'ALL';
+      }
+
+      renderSubjectManageList();
+    }
+
+    function renderSubjectManageList() {
+      const container = document.getElementById('subjectManageList');
+      if (!container) return;
+
+      container.innerHTML = state.subjects.map(sub => `
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 truncate">
+              <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${sub.color}"></span>
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">${sub.name}</span>
+            </div>
+            <button onclick="removeSubject('${sub.id}')" class="text-slate-400 hover:text-rose-500 text-xs">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>Confidence Rating: <strong>${sub.confidence || 3}/5</strong></span>
+            <input type="range" min="1" max="5" value="${sub.confidence || 3}" onchange="updateConfidence('${sub.id}', this.value)" class="w-24 accent-purple-600">
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    async function updateConfidence(id, val) {
+      const sub = state.subjects.find(s => s.id === id);
+      if (sub) {
+        sub.confidence = parseInt(val, 10);
+        saveState();
+        await AcademicAPI.updateConfidence(id, sub.confidence);
+        renderSubjectMatrix();
+        runBlindSpotAudit();
+      }
+    }
+
+    async function handleAddSubject(e) {
+      e.preventDefault();
+      const name = document.getElementById('newSubjectName').value.trim();
+      if (!name) return;
+
+      const palette = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#6366f1', '#14b8a6'];
+      const chosenColor = palette[state.subjects.length % palette.length];
+
+      const newSub = {
+        id: 'sub-' + Date.now(),
+        name,
+        color: chosenColor,
+        confidence: 3
+      };
+
+      state.subjects.push(newSub);
+      saveState();
+      await AcademicAPI.addSubject(newSub);
+      document.getElementById('newSubjectName').value = '';
+      populateSubjectDropdowns();
+      refreshAll();
+    }
+
+    async function removeSubject(id) {
+      if (state.subjects.length <= 1) {
+        alert("You must maintain at least one subject.");
+        return;
+      }
+      if (confirm("Remove subject? Related past study logs will stay preserved.")) {
+        state.subjects = state.subjects.filter(s => s.id !== id);
+        saveState();
+        await AcademicAPI.deleteSubject(id);
+        populateSubjectDropdowns();
+        refreshAll();
+      }
+    }
+
+    /* =========================================================================
+       STATISTICS & KPIS
+       ========================================================================= */
+    function updateKPIs() {
+      // 1. Total Studied Hours
+      const totalHours = state.studyLogs.reduce((acc, curr) => acc + Number(curr.hours), 0);
+      document.getElementById('statTotalHours').textContent = totalHours.toFixed(1);
+
+      // Distinct active days
+      const days = new Set(state.studyLogs.map(l => l.date));
+      document.getElementById('statActiveDays').textContent = days.size;
+
+      // 2. Today's Studied Hours
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayHours = state.studyLogs
+        .filter(l => l.date === todayStr)
+        .reduce((acc, curr) => acc + Number(curr.hours), 0);
+      
+      document.getElementById('statTodayHours').textContent = todayHours.toFixed(1);
+      const targetPercent = Math.min(100, Math.round((todayHours / 4.0) * 100));
+      document.getElementById('statTodayProgress').style.width = targetPercent + '%';
+
+      // 3. Pending & Urgent Assignments
+      const pendingAsgs = state.assignments.filter(a => a.status === 'PENDING');
+      document.getElementById('statPendingAssignments').textContent = pendingAsgs.length;
+
+      const now = new Date();
+      now.setHours(0,0,0,0);
+      const urgentAsgs = pendingAsgs.filter(a => {
+        const due = new Date(a.dueDate + 'T00:00:00');
+        const diffDays = (due - now) / (1000 * 60 * 60 * 24);
+        return diffDays >= 0 && diffDays <= 2;
+      });
+      document.getElementById('statUrgentCount').textContent = urgentAsgs.length;
+    }
+
+    /* =========================================================================
+       MODALS & API KEY CONFIG
+       ========================================================================= */
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openStudyModal() {
+      document.getElementById('studyDateInput').value = new Date().toISOString().split('T')[0];
+      openModal('modalStudy');
+    }
+
+    function openAssignmentModal() {
+      document.getElementById('modalAssignmentTitle').textContent = 'Add Assignment';
+      document.getElementById('assignmentEditId').value = '';
+      document.getElementById('formAssignment').reset();
+      document.getElementById('assignmentDueDateInput').value = getDateOffset(3);
+      openModal('modalAssignment');
+    }
+
+    function toggleTimerModal() {
+      openModal('modalTimer');
+    }
+
+    function openAddSubjectModal() {
+      openModal('modalSubject');
+    }
+
+    function openApiKeyModal() {
+      document.getElementById('geminiApiKeyInput').value = state.geminiApiKey;
+      openModal('modalApiKey');
+    }
+
+    function saveApiKey() {
+      const val = document.getElementById('geminiApiKeyInput').value.trim();
+      state.geminiApiKey = val;
+      localStorage.setItem(STORAGE_KEY_APIKEY, val);
+      updateApiKeyStatusBadge();
+      closeModal('modalApiKey');
+      runBlindSpotAudit();
+    }
+
+    function clearApiKey() {
+      state.geminiApiKey = '';
+      localStorage.removeItem(STORAGE_KEY_APIKEY);
+      document.getElementById('geminiApiKeyInput').value = '';
+      updateApiKeyStatusBadge();
+      closeModal('modalApiKey');
+    }
+
+    function updateApiKeyStatusBadge() {
+      const lbl = document.getElementById('apiKeyStatusLabel');
+      if (state.geminiApiKey) {
+        lbl.textContent = 'Gemini Live Active';
+        lbl.classList.add('text-emerald-500');
+      } else {
+        lbl.textContent = 'Gemini API Key';
+        lbl.classList.remove('text-emerald-500');
+      }
+    }
+
+    /* =========================================================================
+       JSON IMPORT & EXPORT
+       ========================================================================= */
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `academiadata_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importDataJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.subjects && imported.studyLogs && imported.assignments) {
+            state.subjects = imported.subjects;
+            state.studyLogs = imported.studyLogs;
+            state.assignments = imported.assignments;
+            saveState();
+            refreshAll();
+            alert("Data imported successfully!");
+          } else {
+            alert("Invalid schema file.");
+          }
+        } catch (err) {
+          alert("Error parsing JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* =========================================================================
+       MASTER REFRESH & BACKEND SYNC
+       ========================================================================= */
+    async function updateBackendStatusUI() {
+      const pill = document.getElementById('backendStatusPill');
+      const dot = document.getElementById('backendStatusDot');
+      const text = document.getElementById('backendStatusText');
+      if (!pill || !dot || !text) return;
+
+      const isConnected = await AcademicAPI.checkConnection();
+      if (isConnected) {
+        pill.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800";
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        text.textContent = "Node Backend: Connected";
+      } else {
+        pill.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700";
+        dot.className = "w-2 h-2 rounded-full bg-slate-400";
+        text.textContent = "Offline / Standalone Mode";
+      }
+    }
+
+    async function syncFromBackend() {
+      const remote = await AcademicAPI.getState();
+      if (remote && remote.connected) {
+        if (remote.subjects) state.subjects = remote.subjects;
+        if (remote.studyLogs) state.studyLogs = remote.studyLogs;
+        if (remote.assignments) state.assignments = remote.assignments;
+        saveState();
+      }
+      await updateBackendStatusUI();
+    }
+
+    function refreshAll() {
+      populateSubjectDropdowns();
+      updateKPIs();
+      initOrUpdateCharts();
+      renderStudyLogs();
+      renderAssignments();
+      renderSubjectMatrix();
+      runBlindSpotAudit();
+    }
+
+    // App Initialization
+    window.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+      updateApiKeyStatusBadge();
+      await syncFromBackend();
+      refreshAll();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

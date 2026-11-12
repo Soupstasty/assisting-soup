@@ -1,0 +1,12 @@
+{
+  "name": "academia-ai-tracker",
+  "version": "1.0.0",
+  "description": "Academics Tracker & AI Blind Spot Intelligence with pure JavaScript Node.js REST API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["education", "study-tracker", "ai", "blindspots"],
+  "author": "",
+  "license": "MIT"
+}
